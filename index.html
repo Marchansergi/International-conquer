@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conquista Mundial</title>
+<meta name="description" content="Estrategia por turnos: elige un país, forma alianzas, conquista territorios, amplía tu ejército y bombardea a tus enemigos.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8D%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app" class="mode-setup">
+  <header id="topbar">
+    <div class="brand"><span class="globe">🌍</span><span class="brand-name">Conquista Mundial</span></div>
+    <div id="hud" class="hud" hidden>
+      <div class="stat" title="Fecha"><span class="k">Fecha</span><b id="h-date">—</b></div>
+      <div class="stat" title="Oro disponible e ingresos netos por turno"><span class="k">Oro</span><b id="h-gold">0</b><small id="h-inc"></small></div>
+      <div class="stat" title="Tropas totales"><span class="k">Tropas</span><b id="h-troops">0</b></div>
+      <div class="stat" title="Territorios que controlas"><span class="k">Territorios</span><b id="h-terr">0</b></div>
+      <div class="stat wide" title="Porcentaje del mundo que dominas (área, población y PIB)"><span class="k">Dominio <span id="h-goal"></span></span><div class="bar"><i id="h-share-bar"></i></div><b id="h-share">0%</b></div>
+    </div>
+    <div class="top-actions">
+      <button class="btn ghost icon" id="btn-theme" title="Cambiar tema" aria-label="Cambiar tema">🌓</button>
+      <button class="btn ghost icon" id="btn-help" title="Ayuda" aria-label="Ayuda">❔</button>
+      <button class="btn ghost icon" id="btn-menu" title="Menú" aria-label="Menú" hidden>☰</button>
+      <button class="btn primary" id="btn-end" hidden aria-label="Terminar turno"><span class="lbl">Terminar turno </span>▶</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section id="mapwrap" aria-label="Mapa del mundo">
+      <svg id="map" role="img" aria-label="Mapa político del mundo"></svg>
+      <div id="tooltip" hidden></div>
+      <div id="map-tools">
+        <button class="btn icon" data-zoom="in" aria-label="Acercar">＋</button>
+        <button class="btn icon" data-zoom="out" aria-label="Alejar">－</button>
+        <button class="btn icon" data-zoom="reset" aria-label="Ver todo el mundo">⤢</button>
+      </div>
+      <div id="map-modes" class="seg" role="group" aria-label="Capa del mapa" hidden>
+        <button data-mode="political" class="on">Político</button>
+        <button data-mode="relations">Relaciones</button>
+        <button data-mode="military">Militar</button>
+        <button data-mode="economy">Economía</button>
+      </div>
+      <div id="legend"></div>
+      <div id="busy" hidden><div class="spinner"></div><span>Los demás países mueven ficha…</span></div>
+      <div id="banner" hidden></div>
+    </section>
+    <aside id="panel" aria-label="Panel de control">
+      <nav id="tabs" class="tabs" hidden>
+        <button data-tab="country" class="on">País</button>
+        <button data-tab="empire">Imperio</button>
+        <button data-tab="diplo">Diplomacia <i class="badge" id="b-diplo" hidden></i></button>
+        <button data-tab="news">Noticias <i class="badge" id="b-news" hidden></i></button>
+      </nav>
+      <div id="panel-body"></div>
+    </aside>
+  </main>
+</div>
+<div id="modal-root"></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="js/mapdata.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/mapview.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
