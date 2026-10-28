@@ -55,6 +55,10 @@
     $('#modal-root').innerHTML = `<div class="overlay" data-act="overlay"><div class="modal ${cls}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><header><h2>${title}</h2><button class="btn ghost icon" data-act="close" aria-label="Cerrar">✕</button></header><div class="body">${body}</div>${footer ? `<footer>${footer}</footer>` : ''}</div></div>`;
   }
   const closeModal = () => { $('#modal-root').innerHTML = ''; S.atk = S.bomb = S.move = null; };
+  function askConfirm(title, msg, yesLabel, onYes, danger = true) {
+    S.confirmCb = onYes;
+    openModal({ title, body: `<p>${msg}</p>`, footer: `<button class="btn" data-act="close">Cancelar</button><button class="btn ${danger ? 'danger' : 'primary'}" data-act="confirm-yes">${yesLabel}</button>` });
+  }
   const setModalBody = html => { const b = $('#modal-root .body'); if (b) b.innerHTML = html; };
 
   /* ---------- Mapa ---------- */
@@ -546,8 +550,10 @@
   }
 
   /* ---------- Eventos ---------- */
-  function newGame() {
-    if (G && G.turn > 1 && !confirm('¿Empezar una nueva partida? Perderás el progreso no guardado.')) return;
+  function newGame(force) {
+    if (!force && G && G.turn > 1 && !G.over) {
+      return askConfirm('Nueva partida', 'Perderás el progreso no guardado de la partida actual (la partida guardada anterior se conserva hasta el próximo turno).', 'Empezar de nuevo', () => newGame(true));
+    }
     closeModal(); G = null; S.mode = 'setup'; S.sel = null; S.overShown = false;
     $('#app').className = 'mode-setup';
     ['#hud', '#tabs', '#btn-end', '#btn-menu', '#map-modes'].forEach(s => { $(s).hidden = true; });
@@ -596,10 +602,10 @@
       case 'dipf': S.dipFilter = d.v; renderPanel(); break;
       case 'logf': S.logFilter = d.v; renderPanel(); break;
       case 'ally': say(G.proposeAlliance(me, +d.n)); refresh(); break;
-      case 'break': if (confirm(`¿Romper la alianza con ${C[+d.n].name}? Perderás reputación.`)) { say(G.breakAlliance(me, +d.n)); refresh(); } break;
+      case 'break': askConfirm('Romper alianza', `¿Romper la alianza con <b>${C[+d.n].name}</b>? Perderás reputación ante todos sus aliados.`, 'Romper alianza', () => { closeModal(); say(G.breakAlliance(me, +d.n)); refresh(); }); break;
       case 'war': {
         const n = +d.n, al = [...G.A[n]].filter(x => x !== me).map(x => C[x].name);
-        if (confirm(`¿Declarar la guerra a ${C[n].name}?${al.length ? `\nSus aliados (${al.slice(0, 5).join(', ')}) podrían unirse.` : ''}`)) { say(G.declareWar(me, n)); refresh(); }
+        askConfirm('Declarar la guerra', `¿Declarar la guerra a <b>${C[n].name}</b>?${al.length ? ` Sus aliados (${al.slice(0, 5).join(', ')}) podrían unirse.` : ''}`, 'Declarar la guerra', () => { closeModal(); say(G.declareWar(me, n)); refresh(); });
         break;
       }
       case 'join': say(G.joinWar(me, +d.n)); refresh(); break;
@@ -608,6 +614,7 @@
       case 'offer': say(G.answerOffer(+d.idx, d.v === '1')); refresh(); break;
       case 'keep': G.continued = true; G.over = null; closeModal(); toast('Sigue la partida. ¡A por el 100%!', 'good'); break;
       case 'newgame': newGame(); break;
+      case 'confirm-yes': { const cb = S.confirmCb; S.confirmCb = null; if (cb) cb(); break; }
       case 'save': saveGame(); break;
       case 'load': loadGame(); break;
       case 'help': openHelp(); break;
